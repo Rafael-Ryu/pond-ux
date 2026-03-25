@@ -79,12 +79,12 @@ const RP = 48;
 function draw() {
   svg.selectAll("g.base-marker").remove();
 
-  rastreadores.forEach(r => {
+  rastreadores.forEach((r, i) => {
     const pt = map.latLngToContainerPoint([r.pos.lat, r.pos.lng]);
 
     const g = svg.append("g")
       .attr("class", "base-marker")
-      .attr("transform", `translate(${pt.x},${pt.y})`);
+      .attr("transform", `translate(${pt.x},${pt.y}) scale(0)`);
 
     const pulse = g.append("circle")
       .attr("r", R)
@@ -167,7 +167,21 @@ function draw() {
       })
       .on("mouseleave", function() {
         tooltip.style.display = "none";
+      })
+      .on("click", function() {
+        tooltip.style.display = "none";
+        map.flyTo([r.pos.lat, r.pos.lng], Math.max(map.getZoom() + 1, 10), {
+          animate: true,
+          duration: 1.2
+        });
       });
+
+    // entrada com spring
+    g.transition()
+      .duration(500)
+      .delay(i * 80)
+      .ease(d3.easeBackOut.overshoot(1.4))
+      .attr("transform", `translate(${pt.x},${pt.y}) scale(1)`);
   });
 }
 
